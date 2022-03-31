@@ -1,0 +1,31 @@
+name: 'Move Issues To Project Column'
+description: 'Move issues to project column depends on issue marker'
+author: '@fojia'
+inputs:
+  github_token:
+    description: GitHub token.
+    required: false
+  project:
+    description: Project Name.
+    required: true
+  column:
+    description: Project Column Name.
+    required: true
+  issue:
+    description: Issue Data.
+    required: true
+  marker:
+    description: If issue is created from template and we want to move it specific project column need to add marker to issue template.
+    required: false
+  type:
+    description: Project Type (org, repo, user).
+    required: true
+  owner:
+    description: Project Owner.
+    required: true
+  repo:
+    description: Project Repository.
+    required: false
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
