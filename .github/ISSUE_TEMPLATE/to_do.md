@@ -1,6 +1,6 @@
 ---
 name: To Do Template
-about: 
+about: Add these issues to To Do column
 title: ''
 labels: 
 assignees: ''

@@ -4,7 +4,8 @@
 
 This action allows you to use any of the [issue](https://help.github.com/en/articles/events-that-trigger-workflows#issues-event-issues) webhook events to create project cards. For example when an `issue` is `opened` create a card in the project column.
 
-```ymlname: Move new issues into Project Boards
+```yml
+name: Move new issues into Project Boards
 on:
   issues:
     types: [ opened ]

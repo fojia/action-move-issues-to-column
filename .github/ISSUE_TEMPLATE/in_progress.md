@@ -1,6 +1,6 @@
 ---
 name: In Progress Template
-about: 
+about: Add these issues to In Progress column
 title: ''
 labels:
 assignees: ''
