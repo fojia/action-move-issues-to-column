@@ -1,6 +1,6 @@
 name: 'Move Issues To Project Column'
 description: 'Move issues to project column depends on issue marker'
-author: '@fojia'
+author: 'fojia'
 inputs:
   github_token:
     description: GitHub token.
