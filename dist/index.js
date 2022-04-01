@@ -1490,41 +1490,6 @@ exports.checkBypass = checkBypass;
 
 /***/ }),
 
-/***/ 6467:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-var authToken = __nccwpck_require__(5362);
-
-const createActionAuth = function createActionAuth() {
-  if (!process.env.GITHUB_ACTION) {
-    throw new Error("[@octokit/auth-action] `GITHUB_ACTION` environment variable is not set. @octokit/auth-action is meant to be used in GitHub Actions only.");
-  }
-
-  const definitions = [process.env.GITHUB_TOKEN, process.env.INPUT_GITHUB_TOKEN, process.env.INPUT_TOKEN].filter(Boolean);
-
-  if (definitions.length === 0) {
-    throw new Error("[@octokit/auth-action] `GITHUB_TOKEN` variable is not set. It must be set on either `env:` or `with:`. See https://github.com/octokit/auth-action.js#createactionauth");
-  }
-
-  if (definitions.length > 1) {
-    throw new Error("[@octokit/auth-action] The token variable is specified more than once. Use either `with.token`, `with.GITHUB_TOKEN`, or `env.GITHUB_TOKEN`. See https://github.com/octokit/auth-action.js#createactionauth");
-  }
-
-  const token = definitions.pop();
-  return authToken.createTokenAuth(token);
-};
-
-exports.createActionAuth = createActionAuth;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
 /***/ 5362:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -2516,44 +2481,6 @@ exports.composePaginateRest = composePaginateRest;
 exports.isPaginatingEndpoint = isPaginatingEndpoint;
 exports.paginateRest = paginateRest;
 exports.paginatingEndpoints = paginatingEndpoints;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 9331:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-const VERSION = "1.0.4";
-
-/**
- * @param octokit Octokit instance
- * @param options Options passed to Octokit constructor
- */
-
-function requestLog(octokit) {
-  octokit.hook.wrap("request", (request, options) => {
-    octokit.log.debug("request", options);
-    const start = Date.now();
-    const requestOptions = octokit.request.endpoint.parse(options);
-    const path = requestOptions.url.replace(options.baseUrl, "");
-    return request(options).then(response => {
-      octokit.log.info(`${requestOptions.method} ${path} - ${response.status} in ${Date.now() - start}ms`);
-      return response;
-    }).catch(error => {
-      octokit.log.info(`${requestOptions.method} ${path} - ${error.status} in ${Date.now() - start}ms`);
-      throw error;
-    });
-  });
-}
-requestLog.VERSION = VERSION;
-
-exports.requestLog = requestLog;
 //# sourceMappingURL=index.js.map
 
 
@@ -3854,31 +3781,6 @@ const request = withDefaults(endpoint.endpoint, {
 });
 
 exports.request = request;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
-/***/ 6:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-var core = __nccwpck_require__(619);
-var pluginRequestLog = __nccwpck_require__(9331);
-var pluginPaginateRest = __nccwpck_require__(7023);
-var pluginRestEndpointMethods = __nccwpck_require__(7894);
-
-const VERSION = "18.12.0";
-
-const Octokit = core.Octokit.plugin(pluginRequestLog.requestLog, pluginRestEndpointMethods.legacyRestEndpointMethods, pluginPaginateRest.paginateRest).defaults({
-  userAgent: `octokit-rest.js/${VERSION}`
-});
-
-exports.Octokit = Octokit;
 //# sourceMappingURL=index.js.map
 
 
@@ -8397,6 +8299,39 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 3811:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const {graphql} = __nccwpck_require__(5024);
+let instance = null;
+
+class graphqlApi {
+    constructor(token) {
+        this.token = token;
+    }
+
+    static init(token) {
+        if (!instance) {
+            instance = new graphqlApi(token);
+        }
+        return instance;
+    }
+
+    static query(q, params) {
+        if (!instance) {
+            instance = new graphqlApi(token);
+        }
+        
+        return graphql(q, {...{headers: { authorization: `bearer ${instance.token}`}}, ...params });
+
+    }
+}
+
+module.exports = graphqlApi;
+
+
+/***/ }),
+
 /***/ 193:
 /***/ ((module) => {
 
@@ -8567,95 +8502,214 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(4814);
-const rest = __nccwpck_require__(6);
-const auth_action = __nccwpck_require__(6467);
 const github = __nccwpck_require__(1845);
+const graphqlApi = __nccwpck_require__(3811);
+
+const projectOwner = {
+    "repo": "repository",
+    "org": "organization",
+    "user": "user",
+}
+
 async function run() {
     try {
         core.startGroup('Checking Inputs and Initializing... ');
         const projectName = core.getInput('project', {required: true});
         const projectColumn = core.getInput('column', {required: true});
-        const issue = JSON.parse(core.getInput('issue'));
         const marker = core.getInput('marker');
         const githubToken = core.getInput('github_token');
         const owner = core.getInput('owner');
         const repo = core.getInput('repo');
         const projectType = core.getInput('type');
-        core.info('Start Authentication...');
-        console.log(github.context);
-        core.info("Token: " + githubToken);
-        const octokit = new rest.Octokit({
-            auth: githubToken,
-        });
-        core.info("Done.");
-        core.endGroup();
-        core.startGroup("Find Project and Column");
+        const {body, nodeId, html_url} = github.context.payload.issue;
+
+        graphqlApi.init(githubToken);
+
         let projects = [];
         switch (projectType) {
             case "repo":
-                projects = await octokit.request('GET /repos/{owner}/{repo}/projects', {
-                    owner: owner,
-                    repo: repo
-                })
+                projects = await getRepositoryProjects(owner, repo, projectName);
                 break;
             case "org":
-                projects = await octokit.request('GET /orgs/{org}/projects', {
-                    org: owner
-                })
+                projects = await getOrganizationProjects(owner, projectName);
                 break;
             case "user":
-                projects = await octokit.request('GET /users/{username}/projects', {
-                    username: owner
-                })
+                projects = await getUserProjects(owner, projectName);
                 break;
         }
-        projects = projects.data || null;
-        if (!Array.isArray(projects)) {
-            console.log("Project not found!");
+
+        if (!projects[0] || projects[0].name !== projectName) {
+            console.log(`Project not found! Check if project with ${projectName} exists!`);
             return;
         }
 
-        projects = projects.filter(project => project.name === projectName);
-        if (!projects[0]) {
-            console.log("Project not found!");
-            return;
-        }
-
-        let projectColumns = await octokit.request('GET /projects/{project_id}/columns', {
-            project_id: projects[0].id
-        })
-        projectColumns = projectColumns.data || null;
-        if (!Array.isArray(projectColumns)) {
-            console.log("Project doesn't have columns!");
-            return;
-        }
-        projectColumns = projectColumns.filter(column => column.name === projectColumn);
+        const {columns: {nodes: columns}} = projects[0];
+        const projectColumns = columns.filter(column => column.name === projectColumn);
         if (!projectColumns[0]) {
-            console.log("Column not found in project!");
+            console.log(`The ${projectColumn} not found in ${projectName} project!`);
             return;
         }
-        core.endGroup();
-        core.startGroup("Checking Issue and Adding to Project Column");
-        if (!issue || !issue.body) {
-            console.log("Some issue data are missed! Please check input data.");
+
+        if ((body.indexOf(marker) === -1)) {
+            console.log("Issue doesn't have a maker!");
             return;
         }
-        core.info("Checking if marker string exists in body issue.");
-        if ((issue.body.indexOf(marker) !== -1)) {
-            core.info("Add issue to Project Column.");
-            await octokit.request('POST /projects/columns/{column_id}/cards', {
-                column_id: projectColumns[0].id,
-                content_id: issue.id,
-                content_type: 'Issue'
-            })
+
+        const checkIfIssueIsAssociated = await getIssueAssociedCards(html_url);
+        if (checkIfIssueIsAssociated.length === 0) {
+            const results = await addIssueToProjectColumn(projectColumns[0].id, nodeId);
+            console.log(`The card was successfully created in ${projectName} project!`);
+            return;
         }
-        core.endGroup();
+
+        projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
+
+        if (!projectCard[0]) {
+            console.log(`The card not found in ${projectName} project!`);
+            return;
+        }
+
+        const results = await updateProjectCardColumn(projectCard[0].id, projectColumns[0].id);
+
     } catch (e) {
+        console.log(e);
         core.setFailed(e.message);
     }
 }
 
+
+async function getRepositoryProjects(owner, repo, projectName) {
+    const {repository: {projects: {nodes: projects}}} = await graphqlApi.query(
+        `query ($owner: String!, $name: String!, $projectName: String!) {
+            repository(owner: $owner, name: $name) {
+                projects(search: $projectName, last: 1, states: [OPEN]) {
+                    nodes {
+                        name
+                        id
+                            columns(first: 10) {
+                                nodes {
+                                    name,
+                                    id
+                                }
+                            }
+                    }
+                }
+            }
+        }`, {
+            owner: owner,
+            name: repo,
+            projectName: projectName
+        });
+
+    return projects;
+};
+
+async function getOrganizationProjects(owner, projectName) {
+    const {repository: {projects: {nodes: projects}}} = await graphqlApi.query(
+        `query ($owner: String!, $projectName: String!) {
+            organization(login: $owner) {
+                projects(search: $projectName, last: 1, states: [OPEN]) {
+                    nodes {
+                        name
+                        id
+                            columns(first: 10) {
+                                nodes {
+                                    name,
+                                    id
+                                }
+                            }
+                    }
+                }
+            }
+        }`, {
+            owner: owner,
+            projectName: projectName
+        });
+
+    return projects;
+};
+
+async function getUserProjects(owner, projectName) {
+    const {repository: {projects: {nodes: projects}}} = await graphqlApi.query(
+        `query ($owner: String!, $projectName: String!) {
+            user(login: $owner) {
+                projects(search: $projectName, last: 1, states: [OPEN]) {
+                    nodes {
+                        name
+                        id
+                            columns(first: 10) {
+                                nodes {
+                                    name,
+                                    id
+                                }
+                            }
+                    }
+                }
+            }
+        }`, {
+            owner: owner,
+            projectName: projectName
+        });
+
+    return projects;
+};
+
+async function getIssueAssociedCards(url) {
+    const {resource: {projectCards: {nodes: cards}}} = await graphqlApi.query(
+        `query ($link: URI!) {
+          resource(url: $link) {
+            ... on Issue {
+              projectCards {
+                nodes {
+                  id
+                  isArchived
+                  project {
+                    name
+                    id
+                  }
+                }
+              }
+            }
+          }
+        }`, {
+            link: url,
+        });
+
+    return cards;
+};
+
+async function addIssueToProjectColumn(columnId, issueId) {
+    const result = await graphqlApi.query(
+        `mutation ($columnId: ID!, $issueId: ID!) {
+            addProjectCard(input: {projectColumnId: $columnId, contentId: $issueId}) {
+                clientMutationId
+            }
+        }`, {
+            columnId: columnId,
+            issueId: issueId
+        });
+
+    return result;
+};
+
+async function updateProjectCardColumn(cardId, columnId) {
+    const result = await graphqlApi.query(
+        `mutation updateProjectCard($cardId: ID!, $columnId: ID!) {
+            moveProjectCard(input:{cardId: $cardId, columnId: $columnId}) {
+                clientMutationId
+            }
+        }`, {
+            columnId: columnId,
+            cardId: cardId
+        });
+
+    return result;
+};
+
+
 run();
+
+
 })();
 
 module.exports = __webpack_exports__;

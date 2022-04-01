@@ -1,90 +1,208 @@
 const core = require('@actions/core');
-const rest = require("@octokit/rest");
-const auth_action = require("@octokit/auth-action");
 const github = require('@actions/github');
+const graphqlApi = require('./graphql');
+
+const projectOwner = {
+    "repo": "repository",
+    "org": "organization",
+    "user": "user",
+}
+
 async function run() {
     try {
         core.startGroup('Checking Inputs and Initializing... ');
         const projectName = core.getInput('project', {required: true});
         const projectColumn = core.getInput('column', {required: true});
-        const issue = JSON.parse(core.getInput('issue'));
         const marker = core.getInput('marker');
         const githubToken = core.getInput('github_token');
         const owner = core.getInput('owner');
         const repo = core.getInput('repo');
         const projectType = core.getInput('type');
-        core.info('Start Authentication...');
-        console.log(github.context);
-        core.info("Token: " + githubToken);
-        const octokit = new rest.Octokit({
-            auth: githubToken,
-        });
-        core.info("Done.");
-        core.endGroup();
-        core.startGroup("Find Project and Column");
+        const {body, nodeId, html_url} = github.context.payload.issue;
+
+        graphqlApi.init(githubToken);
+
         let projects = [];
         switch (projectType) {
             case "repo":
-                projects = await octokit.request('GET /repos/{owner}/{repo}/projects', {
-                    owner: owner,
-                    repo: repo
-                })
+                projects = await getRepositoryProjects(owner, repo, projectName);
                 break;
             case "org":
-                projects = await octokit.request('GET /orgs/{org}/projects', {
-                    org: owner
-                })
+                projects = await getOrganizationProjects(owner, projectName);
                 break;
             case "user":
-                projects = await octokit.request('GET /users/{username}/projects', {
-                    username: owner
-                })
+                projects = await getUserProjects(owner, projectName);
                 break;
         }
-        projects = projects.data || null;
-        if (!Array.isArray(projects)) {
-            console.log("Project not found!");
+
+        if (!projects[0] || projects[0].name !== projectName) {
+            console.log(`Project not found! Check if project with ${projectName} exists!`);
             return;
         }
 
-        projects = projects.filter(project => project.name === projectName);
-        if (!projects[0]) {
-            console.log("Project not found!");
-            return;
-        }
-
-        let projectColumns = await octokit.request('GET /projects/{project_id}/columns', {
-            project_id: projects[0].id
-        })
-        projectColumns = projectColumns.data || null;
-        if (!Array.isArray(projectColumns)) {
-            console.log("Project doesn't have columns!");
-            return;
-        }
-        projectColumns = projectColumns.filter(column => column.name === projectColumn);
+        const {columns: {nodes: columns}} = projects[0];
+        const projectColumns = columns.filter(column => column.name === projectColumn);
         if (!projectColumns[0]) {
-            console.log("Column not found in project!");
+            console.log(`The ${projectColumn} not found in ${projectName} project!`);
             return;
         }
-        core.endGroup();
-        core.startGroup("Checking Issue and Adding to Project Column");
-        if (!issue || !issue.body) {
-            console.log("Some issue data are missed! Please check input data.");
+
+        if ((body.indexOf(marker) === -1)) {
+            console.log("Issue doesn't have a maker!");
             return;
         }
-        core.info("Checking if marker string exists in body issue.");
-        if ((issue.body.indexOf(marker) !== -1)) {
-            core.info("Add issue to Project Column.");
-            await octokit.request('POST /projects/columns/{column_id}/cards', {
-                column_id: projectColumns[0].id,
-                content_id: issue.id,
-                content_type: 'Issue'
-            })
+
+        const checkIfIssueIsAssociated = await getIssueAssociedCards(html_url);
+        if (checkIfIssueIsAssociated.length === 0) {
+            const results = await addIssueToProjectColumn(projectColumns[0].id, nodeId);
+            console.log(`The card was successfully created in ${projectName} project!`);
+            return;
         }
-        core.endGroup();
+
+        projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
+
+        if (!projectCard[0]) {
+            console.log(`The card not found in ${projectName} project!`);
+            return;
+        }
+
+        const results = await updateProjectCardColumn(projectCard[0].id, projectColumns[0].id);
+
     } catch (e) {
+        console.log(e);
         core.setFailed(e.message);
     }
 }
 
+
+async function getRepositoryProjects(owner, repo, projectName) {
+    const {repository: {projects: {nodes: projects}}} = await graphqlApi.query(
+        `query ($owner: String!, $name: String!, $projectName: String!) {
+            repository(owner: $owner, name: $name) {
+                projects(search: $projectName, last: 1, states: [OPEN]) {
+                    nodes {
+                        name
+                        id
+                            columns(first: 10) {
+                                nodes {
+                                    name,
+                                    id
+                                }
+                            }
+                    }
+                }
+            }
+        }`, {
+            owner: owner,
+            name: repo,
+            projectName: projectName
+        });
+
+    return projects;
+};
+
+async function getOrganizationProjects(owner, projectName) {
+    const {repository: {projects: {nodes: projects}}} = await graphqlApi.query(
+        `query ($owner: String!, $projectName: String!) {
+            organization(login: $owner) {
+                projects(search: $projectName, last: 1, states: [OPEN]) {
+                    nodes {
+                        name
+                        id
+                            columns(first: 10) {
+                                nodes {
+                                    name,
+                                    id
+                                }
+                            }
+                    }
+                }
+            }
+        }`, {
+            owner: owner,
+            projectName: projectName
+        });
+
+    return projects;
+};
+
+async function getUserProjects(owner, projectName) {
+    const {repository: {projects: {nodes: projects}}} = await graphqlApi.query(
+        `query ($owner: String!, $projectName: String!) {
+            user(login: $owner) {
+                projects(search: $projectName, last: 1, states: [OPEN]) {
+                    nodes {
+                        name
+                        id
+                            columns(first: 10) {
+                                nodes {
+                                    name,
+                                    id
+                                }
+                            }
+                    }
+                }
+            }
+        }`, {
+            owner: owner,
+            projectName: projectName
+        });
+
+    return projects;
+};
+
+async function getIssueAssociedCards(url) {
+    const {resource: {projectCards: {nodes: cards}}} = await graphqlApi.query(
+        `query ($link: URI!) {
+          resource(url: $link) {
+            ... on Issue {
+              projectCards {
+                nodes {
+                  id
+                  isArchived
+                  project {
+                    name
+                    id
+                  }
+                }
+              }
+            }
+          }
+        }`, {
+            link: url,
+        });
+
+    return cards;
+};
+
+async function addIssueToProjectColumn(columnId, issueId) {
+    const result = await graphqlApi.query(
+        `mutation ($columnId: ID!, $issueId: ID!) {
+            addProjectCard(input: {projectColumnId: $columnId, contentId: $issueId}) {
+                clientMutationId
+            }
+        }`, {
+            columnId: columnId,
+            issueId: issueId
+        });
+
+    return result;
+};
+
+async function updateProjectCardColumn(cardId, columnId) {
+    const result = await graphqlApi.query(
+        `mutation updateProjectCard($cardId: ID!, $columnId: ID!) {
+            moveProjectCard(input:{cardId: $cardId, columnId: $columnId}) {
+                clientMutationId
+            }
+        }`, {
+            columnId: columnId,
+            cardId: cardId
+        });
+
+    return result;
+};
+
+
 run();
+
