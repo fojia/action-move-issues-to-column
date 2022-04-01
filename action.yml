@@ -11,9 +11,6 @@ inputs:
   column:
     description: Project Column Name.
     required: true
-  issue:
-    description: Issue Data.
-    required: true
   marker:
     description: If issue is created from template and we want to move it specific project column need to add marker to issue template.
     required: false

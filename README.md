@@ -19,7 +19,6 @@ jobs:
         with:
           project: 'Actions Project'
           column: 'To do'
-          issue: ${{ toJson(github.event.issue) }}
           owner: 'fojia'
           repo: 'action-move-issues-to-column'
           type: 'repo'
@@ -34,7 +33,6 @@ jobs:
         with:
           project: 'Organization Project'
           column: 'To do'
-          issue: ${{ toJson(github.event.issue) }}
           owner: 'fojia'
           type: 'org'
           github_token: ${{ secrets.GA_ACCESS_TOKEN}}
@@ -48,7 +46,6 @@ jobs:
         with:
           project: 'User Project'
           column: 'To do'
-          issue: ${{ toJson(github.event.issue) }}
           owner: 'fojia'
           type: 'user'
           github_token: ${{ secrets.GA_ACCESS_TOKEN}}

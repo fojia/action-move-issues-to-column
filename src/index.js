@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const rest = require("@octokit/rest");
 const auth_action = require("@octokit/auth-action");
-
+const github = require('@actions/github');
 async function run() {
     try {
         core.startGroup('Checking Inputs and Initializing... ');
@@ -14,6 +14,7 @@ async function run() {
         const repo = core.getInput('repo');
         const projectType = core.getInput('type');
         core.info('Start Authentication...');
+        console.log(github.context);
         core.info("Token: " + githubToken);
         const octokit = new rest.Octokit({
             auth: githubToken,
