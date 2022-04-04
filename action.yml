@@ -1,6 +1,10 @@
 name: 'Move Issues To Project Column'
-description: 'Move issues to project column depends on issue marker'
+description: 'Move issues to specific project column depends on issue marker. Move issues to specific project column on PR close and merging event to specific branch.'
 author: 'fojia'
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
 inputs:
   github_token:
     description: GitHub token.
