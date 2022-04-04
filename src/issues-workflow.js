@@ -1,4 +1,5 @@
 const core = require('@actions/core');
+const github = require('@actions/github');
 const graphqlApi = require('./graphql');
 const {getIssueAssociedCards, addIssueToProjectColumn, updateProjectCardColumn} = require('./queries')
 

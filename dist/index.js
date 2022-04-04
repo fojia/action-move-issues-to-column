@@ -8336,6 +8336,7 @@ module.exports = graphqlApi;
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(4814);
+const github = __nccwpck_require__(1845);
 const graphqlApi = __nccwpck_require__(3811);
 const {getIssueAssociedCards, addIssueToProjectColumn, updateProjectCardColumn} = __nccwpck_require__(6480)
 
@@ -8373,6 +8374,7 @@ exports.issuesWorkflow = async function (owner, repo, columnId) {
 
 const core = __nccwpck_require__(4814);
 const graphqlApi = __nccwpck_require__(3811);
+const github = __nccwpck_require__(1845);
 const {
     findAllNestedPullRequestsIssues,
     findAllNestedPullRequests,
