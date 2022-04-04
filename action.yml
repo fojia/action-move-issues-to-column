@@ -14,14 +14,19 @@ inputs:
   marker:
     description: If issue is created from template and we want to move it specific project column need to add marker to issue template.
     required: false
+    default: ''
   type:
     description: Project Type (org, repo, user).
     required: true
+    default: 'repo'
   owner:
     description: Project Owner.
     required: true
   repo:
     description: Project Repository.
+    required: false
+  branch:
+    description: The PR's destination branch.
     required: false
 runs:
   using: 'node16'
