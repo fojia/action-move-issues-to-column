@@ -5,7 +5,7 @@ const {getIssueAssociedCards, addIssueToProjectColumn, updateProjectCardColumn} 
 
 exports.issuesWorkflow = async function (owner, repo, columnId) {
     const marker = core.getInput('marker');
-    const {body, nodeId, html_url} = github.context.payload.issue;
+    const {body, node_id, html_url} = github.context.payload.issue;
 
     if ((body.indexOf(marker) === -1)) {
         console.log("Issue doesn't have a maker!");
@@ -14,7 +14,7 @@ exports.issuesWorkflow = async function (owner, repo, columnId) {
 
     const checkIfIssueIsAssociated = await getIssueAssociedCards(html_url);
     if (checkIfIssueIsAssociated.length === 0) {
-        const results = await addIssueToProjectColumn(columnId, nodeId);
+        const results = await addIssueToProjectColumn(columnId, node_id);
         console.log(`The card was successfully created in ${projectName} project!`);
         return;
     }
