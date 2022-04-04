@@ -8858,10 +8858,17 @@ async function run() {
             console.log(`The ${projectColumn} not found in ${projectName} project!`);
             return;
         }
+        core.startGroup('eventName');
+        const {eventName} = github.context;
+        console.log('Event name: ',eventName);
+        core.endGroup();
+        core.startGroup('context');
         console.log(github.context);
-        const {event_name} = github.context;
-        console.log(event_name);
-        if (event_name === 'pull_request') {
+        core.endGroup();
+        core.startGroup('github');
+        console.log(github);
+        core.endGroup();
+        if (eventName === 'pull_request') {
             prWorkflow(owner, repo, projectColumns[0].id);
         } else {
             issuesWorkflow(owner, repo, projectColumns[0].id);
