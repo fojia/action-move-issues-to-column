@@ -10,7 +10,7 @@ const {
     addIssueToProjectColumn
 } = require('./queries')
 
-exports.prWorkflow = async function (owner, repo, columnId) {
+exports.prWorkflow = async function (owner, repo, columnId, projectName) {
     const destBranch = core.getInput('branch');
     
     if(destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false){

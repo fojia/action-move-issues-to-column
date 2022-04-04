@@ -27,7 +27,7 @@ async function run() {
                 projects = await getUserProjects(owner, projectName);
                 break;
         }
-        
+
         if (!projects[0] || projects[0].name !== projectName) {
             console.log(`Project not found! Check if project with ${projectName} exists!`);
             return;
@@ -39,12 +39,12 @@ async function run() {
             console.log(`The ${projectColumn} not found in ${projectName} project!`);
             return;
         }
-        
+
         const {eventName} = github.context;
         if (eventName === 'pull_request') {
-            prWorkflow(owner, repo, projectColumns[0].id);
+            prWorkflow(owner, repo, projectColumns[0].id, projectName);
         } else {
-            issuesWorkflow(owner, repo, projectColumns[0].id);
+            issuesWorkflow(owner, repo, projectColumns[0].id, projectName);
         }
 
     } catch (e) {

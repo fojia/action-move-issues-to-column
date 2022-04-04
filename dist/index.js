@@ -8340,7 +8340,7 @@ const github = __nccwpck_require__(1845);
 const graphqlApi = __nccwpck_require__(3811);
 const {getIssueAssociedCards, addIssueToProjectColumn, updateProjectCardColumn} = __nccwpck_require__(6480)
 
-exports.issuesWorkflow = async function (owner, repo, columnId) {
+exports.issuesWorkflow = async function (owner, repo, columnId, projectName) {
     const marker = core.getInput('marker');
     const {body, node_id, html_url} = github.context.payload.issue;
 
@@ -8384,7 +8384,7 @@ const {
     addIssueToProjectColumn
 } = __nccwpck_require__(6480)
 
-exports.prWorkflow = async function (owner, repo, columnId) {
+exports.prWorkflow = async function (owner, repo, columnId, projectName) {
     const destBranch = core.getInput('branch');
     
     if(destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false){
@@ -8850,7 +8850,7 @@ async function run() {
                 projects = await getUserProjects(owner, projectName);
                 break;
         }
-        
+
         if (!projects[0] || projects[0].name !== projectName) {
             console.log(`Project not found! Check if project with ${projectName} exists!`);
             return;
@@ -8862,12 +8862,12 @@ async function run() {
             console.log(`The ${projectColumn} not found in ${projectName} project!`);
             return;
         }
-        
+
         const {eventName} = github.context;
         if (eventName === 'pull_request') {
-            prWorkflow(owner, repo, projectColumns[0].id);
+            prWorkflow(owner, repo, projectColumns[0].id, projectName);
         } else {
-            issuesWorkflow(owner, repo, projectColumns[0].id);
+            issuesWorkflow(owner, repo, projectColumns[0].id, projectName);
         }
 
     } catch (e) {

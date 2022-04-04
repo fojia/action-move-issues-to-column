@@ -3,7 +3,7 @@ const github = require('@actions/github');
 const graphqlApi = require('./graphql');
 const {getIssueAssociedCards, addIssueToProjectColumn, updateProjectCardColumn} = require('./queries')
 
-exports.issuesWorkflow = async function (owner, repo, columnId) {
+exports.issuesWorkflow = async function (owner, repo, columnId, projectName) {
     const marker = core.getInput('marker');
     const {body, node_id, html_url} = github.context.payload.issue;
 
