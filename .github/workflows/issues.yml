@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Move issue to 'To do' column if body has a mark 'issue:todo'
-        uses: fojia/action-move-issues-to-column@master
+        uses: fojia/action-move-issues-to-column@v1.0.0
         with:
           project: 'Actions Project'
           column: 'To do'
@@ -19,7 +19,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           marker: 'issue:todo'
       - name: Move issue to 'In Progress' column if body has a mark 'issue:inprogress'
-        uses: fojia/action-move-issues-to-column@master
+        uses: fojia/action-move-issues-to-column@v1.0.0
         with:
           project: 'Actions Project'
           column: 'In progress'

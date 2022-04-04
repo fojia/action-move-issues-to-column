@@ -8553,7 +8553,7 @@ async function getRepositoryProjects(owner, repo, projectName) {
 }
 
 async function getOrganizationProjects(owner, projectName) {
-    const {repository: {projects: {nodes: projects}}} = await graphqlApi.query(
+    const {organization: {projects: {nodes: projects}}} = await graphqlApi.query(
         `query ($owner: String!, $projectName: String!) {
             organization(login: $owner) {
                 projects(search: $projectName, last: 1, states: [OPEN]) {

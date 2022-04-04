@@ -4,7 +4,7 @@
 
 This action allows you to use any of
 the [issue](https://help.github.com/en/articles/events-that-trigger-workflows#issues-event-issues) webhook events to
-create project cards. For example when an `issue` is `opened` create a card in the project column. Or on [pull_request](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request) close event move all linked issues(note you should link issues in the Development section of PR ) to this PR or children PRs to specific project column. 
+create project cards. For example when an `issue` is `opened` create a card in the project column. Or on [pull_request](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request) close event move all linked issues(note you should link issues in the Development section of PR ) to this PR or child PRs to specific project column. 
 
 ### Issues workflow example
 ```yml
@@ -65,7 +65,7 @@ jobs:
     name: Move issues to repository project column
     runs-on: ubuntu-latest
     steps:
-      - name: Move all issues related to current PR(into main branch) and children PRs to 'Done' column
+      - name: Move all issues related to current PR(into main branch) and child PRs to 'Done' column
         uses: fojia/action-move-issues-to-column@master
         with:
           project: 'Actions Project'
@@ -78,17 +78,17 @@ jobs:
 
 ## Workflow options
 
-| Inputs         | Description                                                                                               | Values                         |
-|----------------|-----------------------------------------------------------------------------------------------------------|--------------------------------|
-| `on`           | When the automation is ran                                                                                | `issues`, `push:pull_request`              |
-| `types`        | The types of event that will trigger a workflow run.                                                      | `opened`, `edited`, `closed` |
-| `project`      | The name of the project                                                                                   | `Action Project`               |
-| `column`       | The column to create the card to                                                                          | `To do`                        |
-| `github_token` | The personal access token                                                                                 | `${{ secrets.GITHUB_TOKEN }}`  |
-| `owner`        | The Project owner                                                                                         | `fojia`                        |
-| `repo`         | The Project repository (if project inside repository)                                                     | `action-move-issues-to-column` |
-| `type`         | Type for project repository, user or organization project. Default `repo`                                 | `repo`, `user`, `org`          |
-| `branch`       | Base branch. All issues related this PR and children PR issues will move to the specific project column. | `main`                         |
+| Inputs         | Description                                                                                            | Values                         |
+|----------------|--------------------------------------------------------------------------------------------------------|--------------------------------|
+| `on`           | When the automation is ran                                                                             | `issues`, `push:pull_request`              |
+| `types`        | The types of event that will trigger a workflow run.                                                   | `opened`, `edited`, `closed` |
+| `project`      | The name of the project                                                                                | `Action Project`               |
+| `column`       | The column to create the card to                                                                       | `To do`                        |
+| `github_token` | The personal access token                                                                              | `${{ secrets.GITHUB_TOKEN }}`  |
+| `owner`        | The Project owner                                                                                      | `fojia`                        |
+| `repo`         | The Project repository (if project inside repository)                                                  | `action-move-issues-to-column` |
+| `type`         | Type for project repository, user or organization project. Default `repo`                              | `repo`, `user`, `org`          |
+| `branch`       | Base branch. All issues related this PR and child PR issues will moved to the specific project column. | `main`                         |
 
 ## Personal access token
 
