@@ -39,8 +39,9 @@ async function run() {
             console.log(`The ${projectColumn} not found in ${projectName} project!`);
             return;
         }
-
+        console.log(github.context);
         const {event_name} = github.context;
+        console.log(event_name);
         if (event_name === 'pull_request') {
             prWorkflow(owner, repo, projectColumns[0].id);
         } else {
