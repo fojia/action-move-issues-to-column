@@ -8850,10 +8850,7 @@ async function run() {
                 projects = await getUserProjects(owner, projectName);
                 break;
         }
-        core.startGroup('Debug');
-        console.log(projectType, owner, repo, projectName);
-        console.log(projects);
-        core.endGroup();
+        
         if (!projects[0] || projects[0].name !== projectName) {
             console.log(`Project not found! Check if project with ${projectName} exists!`);
             return;
