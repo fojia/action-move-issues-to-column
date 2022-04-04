@@ -102,7 +102,7 @@ async function getRepositoryProjects(owner, repo, projectName) {
                     nodes {
                         name
                         id
-                            columns(first: 10) {
+                            columns(first: 15) {
                                 nodes {
                                     name,
                                     id
