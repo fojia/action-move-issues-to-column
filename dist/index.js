@@ -8385,7 +8385,10 @@ const {
 } = __nccwpck_require__(6480)
 
 exports.prWorkflow = async function (owner, repo, columnId) {
-    const destBranch = core.getInput('branch');
+    core.startGroup('Extract Data');
+    const destBranch = github.context.payload.pull_request.base.ref;
+    console.log('Destination branch: ', destBranch);
+    core.endGroup();
     
     const lastPRs = await lastPullRequests(owner, repo, destBranch);
     if (!lastPRs[0]) {
@@ -8858,16 +8861,8 @@ async function run() {
             console.log(`The ${projectColumn} not found in ${projectName} project!`);
             return;
         }
-        core.startGroup('eventName');
+        
         const {eventName} = github.context;
-        console.log('Event name: ',eventName);
-        core.endGroup();
-        core.startGroup('context');
-        console.log(github.context);
-        core.endGroup();
-        core.startGroup('github');
-        console.log(github);
-        core.endGroup();
         if (eventName === 'pull_request') {
             prWorkflow(owner, repo, projectColumns[0].id);
         } else {

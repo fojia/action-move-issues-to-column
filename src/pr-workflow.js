@@ -11,7 +11,10 @@ const {
 } = require('./queries')
 
 exports.prWorkflow = async function (owner, repo, columnId) {
-    const destBranch = core.getInput('branch');
+    core.startGroup('Extract Data');
+    const destBranch = github.context.payload.pull_request.base.ref;
+    console.log('Destination branch: ', destBranch);
+    core.endGroup();
     
     const lastPRs = await lastPullRequests(owner, repo, destBranch);
     if (!lastPRs[0]) {
