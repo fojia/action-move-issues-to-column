@@ -11,10 +11,18 @@ const {
 } = require('./queries')
 
 exports.prWorkflow = async function (owner, repo, columnId) {
+    const destBranch = core.getInput('branch');
     core.startGroup('Extract Data');
-    const destBranch = github.context.payload.pull_request.base.ref;
-    console.log('Destination branch: ', destBranch);
+    console.log('Destination branch: ', destBranch, github.context.payload.pull_request.base.ref);
     core.endGroup();
+    core.startGroup('Merged');
+    console.log('Github Event: ', github.event);
+    console.log('Github Pull: ', github.event.pull_request);
+    core.endGroup();
+    
+    if(destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false){
+        return;
+    }
     
     const lastPRs = await lastPullRequests(owner, repo, destBranch);
     if (!lastPRs[0]) {
