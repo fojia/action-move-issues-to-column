@@ -8378,7 +8378,7 @@ const {
 } = __nccwpck_require__(6480)
 
 exports.prWorkflow = async function (owner, repo, columnId, projectName) {
-     const destBranch = core.getInput('branch');
+    const destBranch = core.getInput('branch');
     
     if (destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false) {
         return;
@@ -8394,8 +8394,7 @@ exports.prWorkflow = async function (owner, repo, columnId, projectName) {
         return;
     }
     const cursor = lastPRs.length === 1 ? false : lastPRs[0].cursor;
-    
-    let issues = (await findAllNestedPullRequestsIssues(owner, repo, destBranch, cursor));
+    let issues = (await findAllNestedPullRequestsIssues(owner, repo, destBranch, cursor)).filter((v, i, a) => a.findIndex(v2 => (v2.id === v.id)) === i);
     
     if (issues.length === 0) {
         console.log(`Not found any issues related to current PR and all children PRs`);
@@ -8468,6 +8467,7 @@ async function lastPullRequests(owner, repo, destinationBranch) {
 const findAllNestedPullRequestsIssues = async (owner, repo, destinationBranch, endCursor) => {
     let issues = [];
     let pullRequests = await findAllNestedPullRequests(owner, repo, destinationBranch, endCursor);
+     
     if (pullRequests.length) {
         for (let i = 0; i < pullRequests.length; i++) {
             let {closingIssuesReferences: {edges: refIssues}} = pullRequests[i].node;
@@ -8477,7 +8477,7 @@ const findAllNestedPullRequestsIssues = async (owner, repo, destinationBranch, e
                 }
             }
             let results = await findAllNestedPullRequestsIssues(owner, repo, pullRequests[i].node.headRefName, endCursor);
-            return [...issues, ...results];
+            issues = [...issues, ...results];
         }
     }
 

@@ -42,6 +42,7 @@ async function lastPullRequests(owner, repo, destinationBranch) {
 const findAllNestedPullRequestsIssues = async (owner, repo, destinationBranch, endCursor) => {
     let issues = [];
     let pullRequests = await findAllNestedPullRequests(owner, repo, destinationBranch, endCursor);
+     
     if (pullRequests.length) {
         for (let i = 0; i < pullRequests.length; i++) {
             let {closingIssuesReferences: {edges: refIssues}} = pullRequests[i].node;
@@ -51,7 +52,7 @@ const findAllNestedPullRequestsIssues = async (owner, repo, destinationBranch, e
                 }
             }
             let results = await findAllNestedPullRequestsIssues(owner, repo, pullRequests[i].node.headRefName, endCursor);
-            return [...issues, ...results];
+            issues = [...issues, ...results];
         }
     }
 
