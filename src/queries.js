@@ -146,7 +146,7 @@ async function getOrganizationProjects(owner, projectName) {
 }
 
 async function getUserProjects(owner, projectName) {
-    const {repository: {projects: {nodes: projects}}} = await graphqlApi.query(
+    const {user: {projects: {nodes: projects}}} = await graphqlApi.query(
         `query ($owner: String!, $projectName: String!) {
             user(login: $owner) {
                 projects(search: $projectName, last: 1, states: [OPEN]) {
