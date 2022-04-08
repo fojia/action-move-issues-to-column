@@ -1,5 +1,5 @@
 name: 'Move Issues To Project Column'
-description: 'Move issues to a specific project column based on the issue marker. Move linked PR(including child PRs) issues to specific project column on close and merge event.'
+description: 'Move issues to a column based on the issue marker. Move linked PR(child PRs too) issues to column on close and merge event.'
 author: 'fojia'
 branding:
   icon: 'check-circle'
