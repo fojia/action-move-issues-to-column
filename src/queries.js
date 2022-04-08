@@ -61,9 +61,9 @@ const findAllNestedPullRequestsIssues = async (owner, repo, destinationBranch, e
 
 async function findAllNestedPullRequests(owner, repo, destinationBranch, endCursor) {
     const {repository: {pullRequests: {edges: pullRequests}}} = await graphqlApi.query(
-        `query ($owner: String!, $name: String!, $branch: String!, $cursor: String!) {
+        `query ($owner: String!, $name: String!, $branch: String!, ${endCursor === false ? `` : `$cursor: String!`}) {
           repository(owner: $owner, name: $name) {
-            pullRequests(first: 100, baseRefName: $branch, after: $cursor) {
+            pullRequests(first: 100, baseRefName: $branch ${endCursor === false ? `` : `, after: $cursor`}) {
               edges {
                 node {
                   id

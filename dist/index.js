@@ -8378,11 +8378,12 @@ const {
 } = __nccwpck_require__(6480)
 
 exports.prWorkflow = async function (owner, repo, columnId, projectName) {
-    const destBranch = core.getInput('branch');
+    // const destBranch = core.getInput('branch');
+    const destBranch = 'develop';
 
-    if (destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false) {
-        return;
-    }
+    // if (destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false) {
+    //     return;
+    // }
 
     const lastPRs = await lastPullRequests(owner, repo, destBranch);
     if (!lastPRs[0]) {
@@ -8393,9 +8394,10 @@ exports.prWorkflow = async function (owner, repo, columnId, projectName) {
         console.log(`Not found cursor for PR!`);
         return;
     }
-    const cursor = lastPRs[0].cursor;
-    let issues = (await findAllNestedPullRequestsIssues(owner, repo, destBranch, cursor)).filter((v, i, a) => a.findIndex(v2 => (v2.id === v.id)) === i);
-
+    const cursor = lastPRs.length === 1 ? false : lastPRs[0].cursor;
+    
+    let issues = (await findAllNestedPullRequestsIssues(owner, repo, destBranch, cursor));
+    
     if (issues.length === 0) {
         console.log(`Not found any issues related to current PR and all children PRs`);
         return;
@@ -8486,9 +8488,9 @@ const findAllNestedPullRequestsIssues = async (owner, repo, destinationBranch, e
 
 async function findAllNestedPullRequests(owner, repo, destinationBranch, endCursor) {
     const {repository: {pullRequests: {edges: pullRequests}}} = await graphqlApi.query(
-        `query ($owner: String!, $name: String!, $branch: String!, $cursor: String!) {
+        `query ($owner: String!, $name: String!, $branch: String!, ${endCursor === false ? `` : `$cursor: String!`}) {
           repository(owner: $owner, name: $name) {
-            pullRequests(first: 100, baseRefName: $branch, after: $cursor) {
+            pullRequests(first: 100, baseRefName: $branch ${endCursor === false ? `` : `, after: $cursor`}) {
               edges {
                 node {
                   id
