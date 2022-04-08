@@ -14,12 +14,7 @@ class graphqlApi {
     }
 
     static query(q, params) {
-        if (!instance) {
-            instance = new graphqlApi(token);
-        }
-        
-        return graphql(q, {...{headers: { authorization: `bearer ${instance.token}`}}, ...params });
-
+        return graphql(q, {...{headers: {authorization: `bearer ${instance.token}`}}, ...params});
     }
 }
 

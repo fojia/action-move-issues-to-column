@@ -1,10 +1,10 @@
 # Move Issues to Project Column
 
-> Create GitHub Project cards with issue webhook event
+> This is a GitHub Actions that automatically move Issues within Project Columns based on issue or pull request events.
 
 This action allows you to use any of
 the [issue](https://help.github.com/en/articles/events-that-trigger-workflows#issues-event-issues) webhook events to
-create project cards. For example when an `issue` is `opened` create a card in the project column. Or on [pull_request](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request) close event move all linked issues(note you should link issues in the Development section of PR ) to this PR or child PRs to specific project column. 
+create project cards. For example when an `issue` is `opened` create a card in the project column. Or on [pull_request](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request) close event move all linked issues(note you should link issues in the Development section of PR) to this PR or child PRs to specific project column. 
 
 ### Issues workflow example
 ```yml

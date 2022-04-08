@@ -8318,12 +8318,7 @@ class graphqlApi {
     }
 
     static query(q, params) {
-        if (!instance) {
-            instance = new graphqlApi(token);
-        }
-        
-        return graphql(q, {...{headers: { authorization: `bearer ${instance.token}`}}, ...params });
-
+        return graphql(q, {...{headers: {authorization: `bearer ${instance.token}`}}, ...params});
     }
 }
 
@@ -8337,7 +8332,6 @@ module.exports = graphqlApi;
 
 const core = __nccwpck_require__(4814);
 const github = __nccwpck_require__(1845);
-const graphqlApi = __nccwpck_require__(3811);
 const {getIssueAssociedCards, addIssueToProjectColumn, updateProjectCardColumn} = __nccwpck_require__(6480)
 
 exports.issuesWorkflow = async function (owner, repo, columnId, projectName) {
@@ -8355,7 +8349,7 @@ exports.issuesWorkflow = async function (owner, repo, columnId, projectName) {
         return;
     }
 
-    projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
+    let projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
 
     if (!projectCard[0]) {
         await addIssueToProjectColumn(columnId, node_id);
@@ -8374,11 +8368,9 @@ exports.issuesWorkflow = async function (owner, repo, columnId, projectName) {
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(4814);
-const graphqlApi = __nccwpck_require__(3811);
 const github = __nccwpck_require__(1845);
 const {
     findAllNestedPullRequestsIssues,
-    findAllNestedPullRequests,
     lastPullRequests,
     updateProjectCardColumn,
     getIssueAssociedCards,
@@ -8387,11 +8379,11 @@ const {
 
 exports.prWorkflow = async function (owner, repo, columnId, projectName) {
     const destBranch = core.getInput('branch');
-    
-    if(destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false){
+
+    if (destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false) {
         return;
     }
-    
+
     const lastPRs = await lastPullRequests(owner, repo, destBranch);
     if (!lastPRs[0]) {
         console.log(`Not found any PRs for ${destBranch}`);
@@ -8412,16 +8404,16 @@ exports.prWorkflow = async function (owner, repo, columnId, projectName) {
         let issue = issues[i];
         const checkIfIssueIsAssociated = await getIssueAssociedCards(issue.url);
         if (checkIfIssueIsAssociated.length === 0) {
-            const results = await addIssueToProjectColumn(columnId, issue.id);
+            await addIssueToProjectColumn(columnId, issue.id);
             continue;
         }
 
-        projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
+        let projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
         if (!projectCard[0]) {
             continue;
         }
 
-        const results = await updateProjectCardColumn(projectCard[0].id, columnId);
+        await updateProjectCardColumn(projectCard[0].id, columnId);
     }
 }
 
@@ -8445,7 +8437,7 @@ async function updateProjectCardColumn(cardId, columnId) {
         });
 
     return result;
-};
+}
 
 async function lastPullRequests(owner, repo, destinationBranch) {
     const {repository: {pullRequests: {edges: pullRequests}}} = await graphqlApi.query(
@@ -8470,7 +8462,7 @@ async function lastPullRequests(owner, repo, destinationBranch) {
             branch: destinationBranch
         });
     return pullRequests;
-};
+}
 
 const findAllNestedPullRequestsIssues = async (owner, repo, destinationBranch, endCursor) => {
     let issues = [];

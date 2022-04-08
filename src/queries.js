@@ -12,7 +12,7 @@ async function updateProjectCardColumn(cardId, columnId) {
         });
 
     return result;
-};
+}
 
 async function lastPullRequests(owner, repo, destinationBranch) {
     const {repository: {pullRequests: {edges: pullRequests}}} = await graphqlApi.query(
@@ -37,7 +37,7 @@ async function lastPullRequests(owner, repo, destinationBranch) {
             branch: destinationBranch
         });
     return pullRequests;
-};
+}
 
 const findAllNestedPullRequestsIssues = async (owner, repo, destinationBranch, endCursor) => {
     let issues = [];

@@ -1,6 +1,5 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const graphqlApi = require('./graphql');
 const {getIssueAssociedCards, addIssueToProjectColumn, updateProjectCardColumn} = require('./queries')
 
 exports.issuesWorkflow = async function (owner, repo, columnId, projectName) {
@@ -18,7 +17,7 @@ exports.issuesWorkflow = async function (owner, repo, columnId, projectName) {
         return;
     }
 
-    projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
+    let projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
 
     if (!projectCard[0]) {
         await addIssueToProjectColumn(columnId, node_id);

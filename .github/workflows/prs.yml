@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Move all issues related to current PR(into main branch) and child PRs to 'Done' column
-        uses: fojia/action-move-issues-to-column@v1.0.0
+        uses: fojia/action-move-issues-to-column@master
         with:
           project: 'Actions Project'
           column: 'Done'

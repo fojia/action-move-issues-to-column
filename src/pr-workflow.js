@@ -1,9 +1,7 @@
 const core = require('@actions/core');
-const graphqlApi = require('./graphql');
 const github = require('@actions/github');
 const {
     findAllNestedPullRequestsIssues,
-    findAllNestedPullRequests,
     lastPullRequests,
     updateProjectCardColumn,
     getIssueAssociedCards,
@@ -12,11 +10,11 @@ const {
 
 exports.prWorkflow = async function (owner, repo, columnId, projectName) {
     const destBranch = core.getInput('branch');
-    
-    if(destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false){
+
+    if (destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false) {
         return;
     }
-    
+
     const lastPRs = await lastPullRequests(owner, repo, destBranch);
     if (!lastPRs[0]) {
         console.log(`Not found any PRs for ${destBranch}`);
@@ -37,15 +35,15 @@ exports.prWorkflow = async function (owner, repo, columnId, projectName) {
         let issue = issues[i];
         const checkIfIssueIsAssociated = await getIssueAssociedCards(issue.url);
         if (checkIfIssueIsAssociated.length === 0) {
-            const results = await addIssueToProjectColumn(columnId, issue.id);
+            await addIssueToProjectColumn(columnId, issue.id);
             continue;
         }
 
-        projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
+        let projectCard = checkIfIssueIsAssociated.filter(card => card.project.name === projectName);
         if (!projectCard[0]) {
             continue;
         }
 
-        const results = await updateProjectCardColumn(projectCard[0].id, columnId);
+        await updateProjectCardColumn(projectCard[0].id, columnId);
     }
 }

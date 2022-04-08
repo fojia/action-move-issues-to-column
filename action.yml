@@ -1,10 +1,9 @@
 name: 'Move Issues To Project Column'
-description: 'Move issues to specific project column depends on issue marker or on PR closed and merged events to specific branch.'
+description: 'Move issues to a specific project column based on the issue marker. Move linked PR(including child PRs) issues to specific project column on close and merge event.'
 author: 'fojia'
 branding:
   icon: 'check-circle'
   color: 'green'
-
 inputs:
   github_token:
     description: GitHub token.
@@ -16,7 +15,7 @@ inputs:
     description: Project Column Name.
     required: true
   marker:
-    description: If issue is created from template and we want to move it specific project column need to add marker to issue template.
+    description: Substring to mark issue.  
     required: false
     default: ''
   type:

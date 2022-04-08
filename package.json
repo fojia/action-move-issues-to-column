@@ -1,13 +1,18 @@
 {
   "name": "action-move-issues-to-column",
   "version": "1.0.0",
-  "description": "Automate GitHub Project cards on issues/pull request events",
+  "description": "Automate GitHub Project cards on issues or pull request events",
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["issues", "automation", "github-projects", "github-actions"],
+  "keywords": [
+    "issues",
+    "automation",
+    "github-projects",
+    "github-actions"
+  ],
   "author": "fojia",
   "license": "MIT",
   "dependencies": {
@@ -15,5 +20,8 @@
     "@actions/github": "^5.0.0",
     "@octokit/auth-action": "^1.3.3",
     "@octokit/rest": "^18.12.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.12.0"
   }
 }
