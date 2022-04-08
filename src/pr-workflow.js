@@ -9,12 +9,11 @@ const {
 } = require('./queries')
 
 exports.prWorkflow = async function (owner, repo, columnId, projectName) {
-    // const destBranch = core.getInput('branch');
-    const destBranch = 'develop';
-
-    // if (destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false) {
-    //     return;
-    // }
+     const destBranch = core.getInput('branch');
+    
+    if (destBranch !== github.context.payload.pull_request.base.ref || github.context.payload.pull_request.base.merged === false) {
+        return;
+    }
 
     const lastPRs = await lastPullRequests(owner, repo, destBranch);
     if (!lastPRs[0]) {
